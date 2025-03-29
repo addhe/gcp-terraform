@@ -4,8 +4,8 @@ locals {
 }
 
 resource "google_project" "project" {
-  name            = var.project_name[terraform.workspace]
-  project_id      = var.project_id[terraform.workspace]
+  name            = var.project_name[var.environment]
+  project_id      = var.project_id[var.environment]
   billing_account = var.billing_account
   
   # Conditional organization or folder assignment
@@ -13,7 +13,7 @@ resource "google_project" "project" {
   folder_id       = local.is_folder_level ? var.folder_id : null
   
   labels = {
-    environment = terraform.workspace
+    environment = var.environment
     managed_by  = "terraform"
   }
   

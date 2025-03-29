@@ -1,6 +1,6 @@
-# GCP Infrastructure Foundation dengan Terragrunt dan Workspace
+# GCP Infrastructure Foundation dengan Terragrunt dan Folder-Based Environments
 
-Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan mengelola infrastruktur dasar di Google Cloud Platform (GCP) menggunakan pendekatan workspace.
+Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan mengelola infrastruktur dasar di Google Cloud Platform (GCP) menggunakan pendekatan folder-based untuk management lingkungan (environments).
 
 ## Struktur Direktori
 
@@ -10,8 +10,15 @@ Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan men
 │   ├── project/              # Modul untuk membuat dan mengelola project GCP
 │   └── vpc/                  # Modul untuk membuat dan mengelola VPC
 ├── terragrunt/               # Konfigurasi Terragrunt untuk komponen infrastruktur
-│   ├── project/              # Konfigurasi Terragrunt untuk project GCP
-│   └── vpc/                  # Konfigurasi Terragrunt untuk VPC
+│   ├── dev/                  # Konfigurasi untuk environment development
+│   │   ├── project/          # Konfigurasi Terragrunt untuk project GCP (dev)
+│   │   └── vpc/              # Konfigurasi Terragrunt untuk VPC (dev)
+│   ├── stg/                  # Konfigurasi untuk environment staging
+│   │   ├── project/          # Konfigurasi Terragrunt untuk project GCP (stg)
+│   │   └── vpc/              # Konfigurasi Terragrunt untuk VPC (stg)
+│   └── prd/                  # Konfigurasi untuk environment production
+│       ├── project/          # Konfigurasi Terragrunt untuk project GCP (prd)
+│       └── vpc/              # Konfigurasi Terragrunt untuk VPC (prd)
 ├── .gitignore                # File untuk mengabaikan file-file tertentu dalam Git
 ├── terragrunt.hcl            # Konfigurasi root Terragrunt yang digunakan oleh semua komponen
 └── README.md                 # Dokumentasi proyek
@@ -26,26 +33,25 @@ Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan men
 
 ## Perubahan Terbaru
 
-### Refaktor Konfigurasi Project (29 Maret 2025)
+### Migrasi ke Folder-Based Approach (29 Maret 2025)
 
-- **Penggunaan `terraform.workspace`**: Mengubah kode untuk menggunakan `terraform.workspace` langsung di file Terraform untuk mengakses nilai dari map variabel.
-- **Struktur Variabel Map**: Mengubah variabel `project_id` dan `project_name` menjadi map berdasarkan environment (dev, stg, prd).
-- **Penyederhanaan Label**: Menggunakan hardcoded labels di `main.tf` dengan nilai `environment` yang diambil dari `terraform.workspace`.
-- **Penyederhanaan Terragrunt**: Menyederhanakan konfigurasi Terragrunt untuk mengurangi kompleksitas.
+- **Struktur Folder per Environment**: Mengubah pendekatan dari workspace-based menjadi folder-based dengan direktori terpisah untuk setiap environment (dev, stg, prd).
+- **Eksplisit Environment**: Menggunakan variabel `environment` yang dideklarasikan secara eksplisit di setiap file `terragrunt.hcl` environment.
+- **Dependency Management**: Menambahkan mock_outputs untuk dependency antar modul, memungkinkan plan tanpa apply dependencies.
+- **Penyederhanaan Variable Reference**: Menggunakan `var.environment` instead of `terraform.workspace` di modul-modul Terraform.
 
-## Cara Penggunaan dengan Workspace
+## Cara Penggunaan dengan Folder-Based Approach
 
-Repositori ini menggunakan Terragrunt dan workspace Terraform untuk mengelola lingkungan yang berbeda (dev, stg, prd). Workspace memungkinkan Anda menggunakan konfigurasi yang sama dengan variabel yang berbeda untuk setiap lingkungan.
+Repositori ini menggunakan Terragrunt dengan struktur folder untuk mengelola lingkungan yang berbeda (dev, stg, prd). Pendekatan folder-based memungkinkan Anda memiliki konfigurasi terpisah untuk setiap lingkungan dengan struktur direktori yang jelas.
 
 1. Autentikasi ke Google Cloud:
    ```
    gcloud auth application-default login
    ```
 
-2. Menjalankan untuk lingkungan development (default):
+2. Menjalankan untuk lingkungan production:
    ```
-   cd terragrunt/project
-   terragrunt workspace select dev
+   cd terragrunt/prd/project
    terragrunt init
    terragrunt plan
    terragrunt apply
@@ -53,34 +59,23 @@ Repositori ini menggunakan Terragrunt dan workspace Terraform untuk mengelola li
 
 3. Menjalankan untuk lingkungan staging:
    ```
-   cd terragrunt/project
-   terragrunt workspace select stg
+   cd terragrunt/stg/project
    terragrunt init
    terragrunt plan
    terragrunt apply
    ```
 
-4. Menjalankan untuk lingkungan production:
+4. Menjalankan untuk lingkungan development:
    ```
-   cd terragrunt/project
-   terragrunt workspace select prd
+   cd terragrunt/dev/project
    terragrunt init
    terragrunt plan
    terragrunt apply
    ```
 
-5. Alternatif menggunakan variabel lingkungan:
+5. Menjalankan semua modul dalam satu lingkungan:
    ```
-   cd terragrunt/project
-   export TF_WORKSPACE=prd
-   terragrunt init
-   terragrunt plan
-   terragrunt apply
-   ```
-
-6. Untuk menjalankan semua modul sekaligus:
-   ```
-   cd terragrunt
+   cd terragrunt/prd
    terragrunt run-all apply
    ```
 
@@ -89,37 +84,35 @@ Repositori ini menggunakan Terragrunt dan workspace Terraform untuk mengelola li
 - **Project GCP**: Membuat dan mengonfigurasi project GCP dengan pengaturan billing dan API yang diperlukan.
 - **VPC Network**: Membuat jaringan VPC dengan subnet, firewall rules, dan komponen networking lainnya.
 
-## Implementasi Variabel Map
+## Implementasi Environment-Specific Variables
 
 ```hcl
-# Di modules/project/variables.tf
-variable "project_id" {
-  description = "The ID of the project based on environment"
-  type        = map(string)
-  default = {
-    dev = "awanmasterpiece-dev"
-    stg = "awanmasterpiece-stg"
-    prd = "awanmasterpiece-prd"
-  }
+# Di terragrunt/prd/project/terragrunt.hcl
+locals {
+  environment = "prd"
+}
+
+inputs = {
+  environment = local.environment
 }
 
 # Di modules/project/main.tf
 resource "google_project" "project" {
-  name            = var.project_name[terraform.workspace]
-  project_id      = var.project_id[terraform.workspace]
+  name            = var.project_name[var.environment]
+  project_id      = var.project_id[var.environment]
   billing_account = var.billing_account
   
   labels = {
-    environment = terraform.workspace
+    environment = var.environment
     managed_by  = "terraform"
   }
 }
 ```
 
-## Keuntungan Menggunakan Terragrunt dengan Workspace
+## Keuntungan Menggunakan Terragrunt dengan Folder-Based Approach
 
-1. **DRY (Don't Repeat Yourself)**: Mengurangi duplikasi kode dengan menggunakan konfigurasi yang sama untuk semua lingkungan.
-2. **Manajemen State yang Lebih Baik**: State Terraform disimpan terpisah untuk setiap lingkungan dan komponen.
-3. **Dependency Management**: Terragrunt menangani dependensi antar modul secara otomatis.
-4. **Konsistensi**: Memastikan bahwa konfigurasi yang sama diterapkan di semua lingkungan dengan variabel yang sesuai.
-5. **Fleksibilitas Workspace**: Mudah beralih antara lingkungan menggunakan `terragrunt workspace select` atau variabel lingkungan `TF_WORKSPACE`.
+1. **Kejelasan Struktur**: Struktur direktori yang intuitif memperjelas environment mana yang sedang dikerjakan.
+2. **Menghindari Kesalahan**: Tidak perlu khawatir salah memilih workspace karena environment sudah diatur di struktur folder.
+3. **State Isolation**: Setiap environment memiliki state terpisah berdasarkan struktur folder.
+4. **Dependency Management**: Terragrunt menangani dependensi antar modul dengan lebih jelas melalui mock_outputs.
+5. **Parallel Workflow**: Memungkinkan beberapa orang bekerja pada environment yang berbeda secara bersamaan tanpa konflik.

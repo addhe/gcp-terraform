@@ -7,17 +7,18 @@ resource "google_compute_network" "vpc" {
   delete_default_routes_on_create = var.delete_default_routes_on_create
 }
 
+# Menggunakan variabel environment dari Terragrunt (folder-based)
 resource "google_compute_subnetwork" "subnets" {
-  for_each = { for subnet in var.subnets : subnet.name => subnet }
+  for_each = { for subnet in var.subnet_configs[var.environment] : subnet.name => subnet }
 
   project                  = var.project_id
   name                     = each.value.name
   ip_cidr_range           = each.value.ip_cidr_range
   region                   = each.value.region
   network                  = google_compute_network.vpc.id
-  private_ip_google_access = each.value.private_ip_google_access
-  purpose                  = each.value.purpose
-  role                     = each.value.role
+  private_ip_google_access = true
+  purpose                  = "PRIVATE"
+  role                     = null
 
   dynamic "secondary_ip_range" {
     for_each = each.value.secondary_ip_ranges
@@ -29,7 +30,7 @@ resource "google_compute_subnetwork" "subnets" {
 }
 
 resource "google_compute_firewall" "rules" {
-  for_each = { for rule in var.firewall_rules : rule.name => rule }
+  for_each = { for rule in var.firewall_rules[var.environment] : rule.name => rule }
 
   project     = var.project_id
   name        = each.value.name

@@ -6,10 +6,10 @@ remote_state {
   backend = "gcs"
   
   config = {
-    project  = "awanmasterpiece-${local.workspace}"
+    project  = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"
     location = local.region
     bucket   = "awanmasterpiece-terraform-state" # Menggunakan bucket yang sudah dibuat
-    prefix   = "${path_relative_to_include()}/${local.workspace}/terraform.tfstate"
+    prefix   = "${path_relative_to_include()}/terraform.tfstate"
     
     # Enable encryption
     encryption_key = ""
@@ -45,12 +45,12 @@ terraform {
 }
 
 provider "google" {
-  project = "awanmasterpiece-${local.workspace}"
+  project = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"
   region  = "${local.region}"
 }
 
 provider "google-beta" {
-  project = "awanmasterpiece-${local.workspace}"
+  project = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"
   region  = "${local.region}"
 }
 EOF
@@ -58,9 +58,6 @@ EOF
 
 # Load common variables to be used across all modules
 locals {
-  # Mendapatkan workspace dari command-line argument atau TF_WORKSPACE
-  workspace = get_env("TF_WORKSPACE", "dev")
-  
   # Region yang sama untuk semua environment
   region = "asia-southeast2"
   
@@ -70,7 +67,7 @@ locals {
 
 # Configure root level variables that all resources can inherit
 inputs = {
-  environment     = local.workspace
+  environment     = get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))
   region          = local.region
   billing_account = local.billing_account
   organization_id = ""
