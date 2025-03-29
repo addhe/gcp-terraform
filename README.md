@@ -8,17 +8,25 @@ Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan men
 .
 ├── modules/                  # Modul-modul Terraform yang dapat digunakan kembali
 │   ├── project/              # Modul untuk membuat dan mengelola project GCP
-│   └── vpc/                  # Modul untuk membuat dan mengelola VPC
+│   ├── vpc/                  # Modul untuk membuat dan mengelola VPC
+│   ├── kms/                  # Modul untuk Customer-Managed Encryption Keys (CMEK)
+│   └── gke/                  # Modul untuk Google Kubernetes Engine clusters
 ├── terragrunt/               # Konfigurasi Terragrunt untuk komponen infrastruktur
 │   ├── dev/                  # Konfigurasi untuk environment development
 │   │   ├── project/          # Konfigurasi Terragrunt untuk project GCP (dev)
-│   │   └── vpc/              # Konfigurasi Terragrunt untuk VPC (dev)
+│   │   ├── vpc/              # Konfigurasi Terragrunt untuk VPC (dev)
+│   │   ├── kms/              # Konfigurasi Terragrunt untuk KMS (dev)
+│   │   └── gke/              # Konfigurasi Terragrunt untuk GKE (dev)
 │   ├── stg/                  # Konfigurasi untuk environment staging
 │   │   ├── project/          # Konfigurasi Terragrunt untuk project GCP (stg)
-│   │   └── vpc/              # Konfigurasi Terragrunt untuk VPC (stg)
+│   │   ├── vpc/              # Konfigurasi Terragrunt untuk VPC (stg)
+│   │   ├── kms/              # Konfigurasi Terragrunt untuk KMS (stg)
+│   │   └── gke/              # Konfigurasi Terragrunt untuk GKE (stg)
 │   └── prd/                  # Konfigurasi untuk environment production
 │       ├── project/          # Konfigurasi Terragrunt untuk project GCP (prd)
-│       └── vpc/              # Konfigurasi Terragrunt untuk VPC (prd)
+│       ├── vpc/              # Konfigurasi Terragrunt untuk VPC (prd)
+│       ├── kms/              # Konfigurasi Terragrunt untuk KMS (prd)
+│       └── gke/              # Konfigurasi Terragrunt untuk GKE (prd)
 ├── .gitignore                # File untuk mengabaikan file-file tertentu dalam Git
 ├── terragrunt.hcl            # Konfigurasi root Terragrunt yang digunakan oleh semua komponen
 └── README.md                 # Dokumentasi proyek
@@ -32,6 +40,16 @@ Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan men
 - Akun Google Cloud dengan akses yang sesuai
 
 ## Perubahan Terbaru
+
+### Implementasi GKE dengan CMEK dan Optimasi Resource (30 Maret 2025)
+
+- **GKE dengan CMEK**: Mengimplementasikan Google Kubernetes Engine (GKE) cluster dengan Customer-Managed Encryption Keys (CMEK) untuk enkripsi database.
+- **Zonal vs Regional**: Mengubah konfigurasi dari regional menjadi zonal (asia-southeast2-a) untuk optimasi kuota resource.
+- **Optimasi Resource**:
+  - Mengoptimalkan kebutuhan CPU: default node pool (e2-standard-2, 1 node), workload node pool (e2-small, 1 node), total 4 vCPUs.
+  - Mengurangi disk size dari 50GB menjadi 20GB dan menggunakan pd-standard untuk mengatasi keterbatasan kuota SSD.
+  - Mengkonfigurasi autoscaling dengan min_node_count=1 dan max_node_count yang lebih rendah.
+- **Perbaikan Konfigurasi Jaringan**: Menggunakan ip_allocation_policy dengan secondary ranges untuk pods dan services.
 
 ### Migrasi ke Folder-Based Approach (29 Maret 2025)
 
@@ -83,6 +101,8 @@ Repositori ini menggunakan Terragrunt dengan struktur folder untuk mengelola lin
 
 - **Project GCP**: Membuat dan mengonfigurasi project GCP dengan pengaturan billing dan API yang diperlukan.
 - **VPC Network**: Membuat jaringan VPC dengan subnet, firewall rules, dan komponen networking lainnya.
+- **KMS (Key Management Service)**: Mengelola Customer-Managed Encryption Keys (CMEK) untuk enkripsi database dan resources lainnya.
+- **GKE (Google Kubernetes Engine)**: Membuat dan mengelola cluster Kubernetes dengan node pools teroptimasi dan enkripsi CMEK.
 
 ## Implementasi Environment-Specific Variables
 
