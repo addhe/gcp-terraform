@@ -1,0 +1,15 @@
+# Contoh file terraform.tfvars
+# Salin file ini ke terraform.tfvars dan sesuaikan nilai-nilainya
+
+# ID project GCP yang akan digunakan untuk bucket state
+project_id = "my-company-dev"
+
+# Region GCP untuk menyimpan bucket state
+region = "asia-southeast1"
+
+# List IAM members yang memiliki akses admin ke bucket state
+# Format: ["user:email@example.com", "serviceAccount:sa@project.iam.gserviceaccount.com"]
+admin_members = ["user:admin@example.com"]
+
+# List IAM members yang memiliki akses read-only ke bucket state
+viewer_members = []

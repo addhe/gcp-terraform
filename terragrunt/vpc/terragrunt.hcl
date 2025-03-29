@@ -1,30 +1,27 @@
-module "project" {
-  source = "../../modules/project"
-
-  project_id      = var.project_id
-  project_name    = var.project_name
-  billing_account = var.billing_account
-  organization_id = var.organization_id
-  folder_id       = var.folder_id
-  services        = var.project_services
-  labels          = {
-    environment = "dev"
-    managed_by  = "terraform"
-  }
+include {
+  path = find_in_parent_folders()
 }
 
-module "vpc" {
+terraform {
   source = "../../modules/vpc"
+}
 
-  project_id   = module.project.project_id
-  network_name = "${var.project_id}-vpc"
-  description  = "Development VPC network for ${var.project_name}"
+# Pastikan modul project dijalankan terlebih dahulu
+dependency "project" {
+  config_path = "../project"
+}
 
+# Konfigurasi spesifik untuk modul vpc
+inputs = {
+  project_id   = dependency.project.outputs.project_id
+  network_name = "${dependency.project.outputs.project_id}-vpc"
+  description  = "${terraform.workspace} VPC network for ${dependency.project.outputs.project_name}"
+  
   subnets = [
     {
       name          = "subnet-01"
       ip_cidr_range = "10.0.0.0/24"
-      region        = var.region
+      region        = local.project_configs[local.workspace].region
       secondary_ip_ranges = [
         {
           range_name    = "pods"
@@ -39,7 +36,7 @@ module "vpc" {
     {
       name          = "subnet-02"
       ip_cidr_range = "10.0.1.0/24"
-      region        = var.region
+      region        = local.project_configs[local.workspace].region
     }
   ]
 
@@ -74,4 +71,12 @@ module "vpc" {
       ]
     }
   ]
+}
+
+# Tambahkan hook untuk memastikan workspace yang benar digunakan
+terraform {
+  before_hook "workspace_select" {
+    commands = ["init", "plan", "apply", "destroy"]
+    execute  = ["terraform", "workspace", "select", get_env("TF_WORKSPACE", "dev"), "-or-create"]
+  }
 }

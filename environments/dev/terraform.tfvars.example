@@ -1,7 +1,0 @@
-# Rename this file to terraform.tfvars and update with your values
-project_id       = "my-company-dev"
-project_name     = "My Company Dev"
-billing_account  = "XXXXXX-XXXXXX-XXXXXX" # Update with your billing account ID
-organization_id  = ""                      # Optional: Update with your organization ID if applicable
-folder_id        = ""                      # Optional: Update with your folder ID if applicable
-region           = "asia-southeast1"       # Update with your preferred region
