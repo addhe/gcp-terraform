@@ -6,7 +6,7 @@ remote_state {
   backend = "gcs"
   
   config = {
-    project  = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"
+    project  = "awanmasterpiece" # Project tempat bucket state disimpan
     location = local.region
     bucket   = "awanmasterpiece-terraform-state" # Menggunakan bucket yang sudah dibuat
     prefix   = "${path_relative_to_include()}/terraform.tfstate"
