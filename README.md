@@ -41,6 +41,16 @@ Repositori ini berisi konfigurasi Terragrunt dan Terraform untuk membuat dan men
 
 ## Perubahan Terbaru
 
+### Implementasi GCE dengan CMEK dan IAM (30 Maret 2025)
+
+- **GCE dengan CMEK**: Mengimplementasikan Google Compute Engine (GCE) instances dengan Customer-Managed Encryption Keys (CMEK) untuk enkripsi disk.
+- **IAM untuk KMS**: Menambahkan modul IAM untuk mengelola permission KMS key bagi service account VM instances.
+- **Optimasi Disk**:
+  - Menggunakan pd-standard untuk data disk (200GB) untuk mengatasi keterbatasan kuota SSD.
+  - Mengkonfigurasi boot disk yang kecil (10GB) dengan Ubuntu 22.04 LTS.
+  - Menerapkan CMEK untuk enkripsi data disk.
+- **High Availability**: Mendistribusikan VM instances di multiple zones (asia-southeast2-a dan asia-southeast2-b).
+
 ### Implementasi GKE dengan CMEK dan Optimasi Resource (30 Maret 2025)
 
 - **GKE dengan CMEK**: Mengimplementasikan Google Kubernetes Engine (GKE) cluster dengan Customer-Managed Encryption Keys (CMEK) untuk enkripsi database.
