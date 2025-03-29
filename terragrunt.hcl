@@ -6,9 +6,9 @@ remote_state {
   backend = "gcs"
   
   config = {
-    project  = local.project_configs[local.workspace].project_id
-    location = local.project_configs[local.workspace].region
-    bucket   = "${local.project_configs[local.workspace].project_id}-terraform-state"
+    project  = "awanmasterpiece-${local.workspace}"
+    location = local.region
+    bucket   = "awanmasterpiece-terraform-state" # Menggunakan bucket yang sudah dibuat
     prefix   = "${path_relative_to_include()}/${local.workspace}/terraform.tfstate"
     
     # Enable encryption
@@ -18,7 +18,7 @@ remote_state {
     enable_bucket_policy_only = true
   }
   
-  # Automatically create the GCS bucket if it doesn't exist
+  # Bucket sudah dibuat, jadi kita tidak perlu generate lagi
   generate = {
     path      = "backend.tf"
     if_exists = "overwrite_terragrunt"
@@ -45,61 +45,34 @@ terraform {
 }
 
 provider "google" {
-  project = "${local.project_configs[terraform.workspace].project_id}"
-  region  = "${local.project_configs[terraform.workspace].region}"
+  project = "awanmasterpiece-${local.workspace}"
+  region  = "${local.region}"
 }
 
 provider "google-beta" {
-  project = "${local.project_configs[terraform.workspace].project_id}"
-  region  = "${local.project_configs[terraform.workspace].region}"
+  project = "awanmasterpiece-${local.workspace}"
+  region  = "${local.region}"
 }
 EOF
 }
 
 # Load common variables to be used across all modules
 locals {
-  # Get the current Terraform workspace
+  # Mendapatkan workspace dari command-line argument atau TF_WORKSPACE
   workspace = get_env("TF_WORKSPACE", "dev")
   
-  # Define configuration for each workspace/environment
-  project_configs = {
-    dev = {
-      environment    = "dev"
-      project_id     = "my-company-dev"
-      project_name   = "My Company Dev"
-      region         = "asia-southeast1"
-      billing_account = ""
-      organization_id = ""
-      folder_id       = ""
-    }
-    staging = {
-      environment    = "staging"
-      project_id     = "my-company-staging"
-      project_name   = "My Company Staging"
-      region         = "asia-southeast1"
-      billing_account = ""
-      organization_id = ""
-      folder_id       = ""
-    }
-    prod = {
-      environment    = "prod"
-      project_id     = "my-company-prod"
-      project_name   = "My Company Production"
-      region         = "asia-southeast1"
-      billing_account = ""
-      organization_id = ""
-      folder_id       = ""
-    }
-  }
+  # Region yang sama untuk semua environment
+  region = "asia-southeast2"
+  
+  # Billing account yang sama untuk semua environment
+  billing_account = "013A89-4FE496-09FAF2" # My Billing Account Oct 2024 (aktif)
 }
 
 # Configure root level variables that all resources can inherit
 inputs = {
-  environment     = local.project_configs[local.workspace].environment
-  project_id      = local.project_configs[local.workspace].project_id
-  project_name    = local.project_configs[local.workspace].project_name
-  region          = local.project_configs[local.workspace].region
-  billing_account = local.project_configs[local.workspace].billing_account
-  organization_id = local.project_configs[local.workspace].organization_id
-  folder_id       = local.project_configs[local.workspace].folder_id
+  environment     = local.workspace
+  region          = local.region
+  billing_account = local.billing_account
+  organization_id = ""
+  folder_id       = ""
 }

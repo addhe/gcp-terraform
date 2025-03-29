@@ -7,8 +7,16 @@ terraform {
 }
 
 # Konfigurasi spesifik untuk modul project
+locals {
+  # Mendapatkan workspace dari command-line argument atau TF_WORKSPACE
+  workspace = get_env("TF_WORKSPACE", "dev")
+}
+
 inputs = {
-  project_services = [
+  # Pass workspace as environment to module
+  environment = local.workspace
+  
+  services = [
     "compute.googleapis.com",
     "iam.googleapis.com",
     "container.googleapis.com",
@@ -22,14 +30,8 @@ inputs = {
   
   labels = {
     managed_by  = "terraform"
-    terraform_workspace = terraform.workspace
+    environment = local.workspace
   }
 }
 
-# Tambahkan hook untuk memastikan workspace yang benar digunakan
-terraform {
-  before_hook "workspace_select" {
-    commands = ["init", "plan", "apply", "destroy"]
-    execute  = ["terraform", "workspace", "select", get_env("TF_WORKSPACE", "dev"), "-or-create"]
-  }
-}
+

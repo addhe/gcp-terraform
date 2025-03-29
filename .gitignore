@@ -41,9 +41,11 @@ credentials.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 *tfplan*
-# example: *tfplan*
+
+# Terragrunt specific
+**/.terragrunt-cache/*
+.terraform.lock.hcl
 
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
->>>>>>> cf64fd5f7d103a023f183a53ac5b92f6744b70a3
