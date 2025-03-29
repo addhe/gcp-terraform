@@ -49,3 +49,6 @@ credentials.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Ignore st directory with terraform binary cache
+st/
