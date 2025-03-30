@@ -6,23 +6,6 @@ terraform {
   source = "../../../modules/secretmanager"
 }
 
-dependency "cloudsql" {
-  config_path = "../cloudsql"
-  
-  mock_outputs = {
-    db_instance_name = "mock-db-instance"
-    user_password    = "mock-password"
-  }
-}
-
-dependency "redis" {
-  config_path = "../redis"
-  
-  mock_outputs = {
-    auth_string = "mock-auth-string"
-  }
-}
-
 locals {
   environment = "dev"
 }
@@ -33,7 +16,7 @@ inputs = {
   secrets = {
     mysql_app = {
       secret_id   = "mysql-app-password"
-      secret_data = dependency.cloudsql.outputs.user_password
+      secret_data = "dummy-password-to-be-updated-later"  # Will be updated later
       labels = {
         app     = "mysql"
         purpose = "app-database"
@@ -45,7 +28,7 @@ inputs = {
     
     redis_auth = {
       secret_id   = "redis-auth-string"
-      secret_data = dependency.redis.outputs.auth_string
+      secret_data = "dummy-auth-to-be-updated-later"  # Will be updated later
       labels = {
         app     = "redis"
         purpose = "cache"

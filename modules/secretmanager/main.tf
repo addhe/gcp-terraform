@@ -52,7 +52,8 @@ resource "google_secret_manager_secret_iam_member" "secret_access" {
     ]) : "${access.sa_email}-${access.secret}" => access
   }
 
-  secret_id = google_secret_manager_secret.secret[each.value.secret].id
+  project   = google_secret_manager_secret.secret[keys(google_secret_manager_secret.secret)[0]].project
+  secret_id = each.value.secret
   role      = each.value.role
   member    = "serviceAccount:${each.value.sa_email}"
 }
