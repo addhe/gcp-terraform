@@ -84,6 +84,6 @@ inputs = {
     engine      = "postgresql"
   }
   
-  deletion_protection = false
+  deletion_protection = true
   encryption_key_name = dependency.kms.outputs.cloudsql_crypto_key_id
 }
