@@ -23,7 +23,8 @@ inputs = {
     "monitoring.googleapis.com",
     "logging.googleapis.com",
     "sqladmin.googleapis.com",
-    "redis.googleapis.com"
+    "redis.googleapis.com",
+    "secretmanager.googleapis.com"
   ]
   
   labels = {
