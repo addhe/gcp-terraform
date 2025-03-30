@@ -4,7 +4,7 @@ variable "instance_name" {
 }
 
 variable "database_version" {
-  description = "The MySQL version to use"
+  description = "The database version to use (e.g., MYSQL_8_0 or POSTGRES_15)"
   type        = string
   default     = "MYSQL_8_0"
 }

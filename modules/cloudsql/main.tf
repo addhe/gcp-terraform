@@ -1,3 +1,7 @@
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
 resource "random_password" "user_password" {
   count   = var.user_password == "" ? 1 : 0
   length  = 16
@@ -5,7 +9,7 @@ resource "random_password" "user_password" {
 }
 
 resource "google_sql_database_instance" "instance" {
-  name                = var.instance_name
+  name                = "${var.instance_name}-${random_id.db_name_suffix.hex}"
   region              = var.region
   database_version    = var.database_version
   deletion_protection = var.deletion_protection

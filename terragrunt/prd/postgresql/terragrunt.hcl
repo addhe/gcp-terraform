@@ -2,7 +2,6 @@ include "root" {
   path = find_in_parent_folders()
 }
 
-# Dependency pada VPC untuk private networking
 dependency "vpc" {
   config_path = "../vpc"
   
@@ -14,7 +13,6 @@ dependency "vpc" {
   }
 }
 
-# Dependency pada KMS untuk CMEK
 dependency "kms" {
   config_path = "../kms"
   
@@ -29,19 +27,17 @@ locals {
   environment = "prd"
 }
 
-# Menggunakan modul CloudSQL
 terraform {
   source = "${get_parent_terragrunt_dir()}/modules//cloudsql"
 }
 
-# Konfigurasi input untuk CloudSQL
 inputs = {
-  instance_name     = "awanmasterpiece-prd-mysql"
-  database_version  = "MYSQL_8_0"
+  instance_name     = "awanmasterpiece-prd-postgresql"
+  database_version  = "POSTGRES_15"
   region           = "asia-southeast2"
   tier             = "db-f1-micro"
-  disk_size        = 10
-  disk_type        = "PD_STANDARD"
+  disk_size        = 15
+  disk_type        = "PD_SSD"
   database_name    = "app_database"
   user_name        = "admin"
 
@@ -49,8 +45,8 @@ inputs = {
   
   backup_configuration = {
     enabled                        = true
-    binary_log_enabled            = true
-    start_time                    = "02:00"
+    binary_log_enabled            = false  # Not applicable for PostgreSQL
+    start_time                    = "04:00"
     location                      = "asia-southeast2"
     transaction_log_retention_days = 7
     retained_backups              = 7
@@ -58,19 +54,19 @@ inputs = {
   }
   
   maintenance_window = {
-    day          = 7  # Sunday
+    day          = 5  # Friday
     hour         = 3  # 3 AM
     update_track = "stable"
   }
   
   database_flags = [
     {
-      name  = "slow_query_log"
-      value = "on"
+      name  = "log_min_duration_statement"
+      value = "1000"  # Log queries that run longer than 1 second
     },
     {
-      name  = "long_query_time"
-      value = "1"
+      name  = "max_connections"
+      value = "100"
     }
   ]
   
@@ -85,8 +81,9 @@ inputs = {
   user_labels = {
     environment = local.environment
     managed_by  = "terragrunt"
+    engine      = "postgresql"
   }
   
-  deletion_protection = true
+  deletion_protection = false
   encryption_key_name = dependency.kms.outputs.cloudsql_crypto_key_id
 }

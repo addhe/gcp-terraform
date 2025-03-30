@@ -21,7 +21,8 @@ inputs = {
     "cloudbilling.googleapis.com",
     "cloudkms.googleapis.com",
     "monitoring.googleapis.com",
-    "logging.googleapis.com"
+    "logging.googleapis.com",
+    "sqladmin.googleapis.com"
   ]
   
   labels = {

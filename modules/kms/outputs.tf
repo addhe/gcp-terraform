@@ -39,3 +39,8 @@ output "compute_disk_crypto_key_id" {
   description = "ID dari crypto key untuk Compute disk encryption"
   value       = contains(var.crypto_key_names, "compute-disk") ? google_kms_crypto_key.crypto_keys["compute-disk"].id : null
 }
+
+output "cloudsql_crypto_key_id" {
+  description = "ID dari crypto key untuk CloudSQL encryption"
+  value       = contains(var.crypto_key_names, "cloudsql") ? google_kms_crypto_key.crypto_keys["cloudsql"].id : null
+}

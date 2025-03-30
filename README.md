@@ -113,6 +113,7 @@ Repositori ini menggunakan Terragrunt dengan struktur folder untuk mengelola lin
 - **VPC Network**: Membuat jaringan VPC dengan subnet, firewall rules, dan komponen networking lainnya.
 - **KMS (Key Management Service)**: Mengelola Customer-Managed Encryption Keys (CMEK) untuk enkripsi database dan resources lainnya.
 - **GKE (Google Kubernetes Engine)**: Membuat dan mengelola cluster Kubernetes dengan node pools teroptimasi dan enkripsi CMEK.
+- **CloudSQL MySQL**: Database MySQL yang dikelola dengan high availability, backup otomatis, dan enkripsi CMEK.
 
 ## Implementasi Environment-Specific Variables
 

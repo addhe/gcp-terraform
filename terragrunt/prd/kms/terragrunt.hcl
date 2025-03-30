@@ -39,6 +39,7 @@ inputs = {
   crypto_key_names = [
     "gke-etcd",        # Untuk enkripsi data etcd GKE
     "gke-app-secrets", # Untuk enkripsi secrets aplikasi
-    "compute-disk"     # Untuk enkripsi persistent disks
+    "compute-disk",    # Untuk enkripsi persistent disks
+    "cloudsql"         # Untuk enkripsi CloudSQL instances
   ]
 }

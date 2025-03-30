@@ -41,6 +41,10 @@ terraform {
       source  = "hashicorp/google-beta"
       version = "~> 4.80.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -48,6 +52,8 @@ provider "google" {
   project = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"
   region  = "${local.region}"
 }
+
+provider "random" {}
 
 provider "google-beta" {
   project = "awanmasterpiece-${get_env("TG_ENV", basename(dirname(get_terragrunt_dir())))}"

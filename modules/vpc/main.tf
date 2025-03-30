@@ -29,6 +29,22 @@ resource "google_compute_subnetwork" "subnets" {
   }
 }
 
+# Private Services Connection
+resource "google_compute_global_address" "private_ip_alloc" {
+  project       = var.project_id
+  name          = "${var.network_name}-private-ip-alloc"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.vpc.id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+}
+
 resource "google_compute_firewall" "rules" {
   for_each = { for rule in var.firewall_rules[var.environment] : rule.name => rule }
 
