@@ -22,7 +22,8 @@ inputs = {
     "cloudkms.googleapis.com",
     "monitoring.googleapis.com",
     "logging.googleapis.com",
-    "sqladmin.googleapis.com"
+    "sqladmin.googleapis.com",
+    "redis.googleapis.com"
   ]
   
   labels = {
